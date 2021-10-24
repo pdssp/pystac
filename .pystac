@@ -1,0 +1,2 @@
+python3 -m venv pystac-env && export PYTHONPATH=. && export PATH=/home/malapert/pole/pystac/pystac-env/bin:/home/malapert/pole/pystac/pystac-env/bin:/home/malapert/.deta/bin:/usr/lib/jvm/java-8-openjdk-amd64/bin:/home/malapert/.deta/bin:/home/malapert/anaconda3/condabin:/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/lib/jvm/java-8-openjdk-amd64/bin
+source "/home/malapert/pole/pystac/pystac-env/bin/activate"
