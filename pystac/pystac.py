@@ -94,6 +94,9 @@ from .constants import RoleType
 
 # TODO 5 : Extend properties by loading an extension
 
+# TODO Additional attributes relating to an Item should be added into the Item Properties object, rather than directly in the Item object.
+# TODO In general, additional attributes that apply to an Item Asset should also be allowed in Item Properties and vice-versa. For example, the eo:bands attribute may be used in Item Properties to describe the aggregation of all bands available in the Item Asset objects contained in the Item, but may also be used in an individual Item Asset to describe only the bands available in that asset.
+
 logger = logging.getLogger(__name__)
 
 
@@ -798,11 +801,12 @@ class StacCatalog(Observer):
         self.__stac_version: str = stac_version
         self.__links: List[Link] = list()
         self.__stac_extensions: List[str] = list()
+        self.__stac_extensions_properties: Dict[str, Any] = dict()
         self.__title: Optional[str] = kwargs.get("title", None)
         self.__parent: Union[
             StacCatalog, StacCollection, None
         ] = self._validate_parent(kwargs.get("parent", None))
-        self._update_links()
+        self._create_links()
 
     def _validate_parent(
         self, parent: Union["StacCollection", "StacCatalog", None]
@@ -831,8 +835,8 @@ class StacCatalog(Observer):
             )
         return parent
 
-    def _update_root_link(self):
-        """Update root link"""
+    def _create_root_link(self):
+        """Create root link"""
         back_path: str
         filename: str
         if self.parent is None:
@@ -852,8 +856,8 @@ class StacCatalog(Observer):
         parentLink.type = MediaType.STAC_CATALOG
         self.__links.append(parentLink)
 
-    def _update_self_link(self, catalog_name: str):
-        """Update self link
+    def _create_self_link(self, catalog_name: str):
+        """Create self link
 
         Args:
             catalog_name (str): name of this catalog
@@ -865,18 +869,12 @@ class StacCatalog(Observer):
             else MediaType.STAC_COLLECTION
         )
         selfLink.title = self.title if self.title is not None else str(self.id)
-        is_found = False
-        for idx, link in enumerate(self.links):
-            if link.href == selfLink.href and link.rel == selfLink.rel:
-                self.links[idx] = selfLink
-                is_found = True
-        if not is_found:
-            self.__links.append(selfLink)
+        self.__links.append(selfLink)
 
-    def _update_child_link(
+    def _create_child_link(
         self, parent: Union["StacCatalog", "StacCollection"]
     ):
-        """Update the child link of the parent
+        """Create the child link of the parent
 
         Args:
             parent (Union["StacCatalog", "StacCollection"]): parent
@@ -899,18 +897,12 @@ class StacCatalog(Observer):
         if self.title is not None:
             childLink.title = self.title
 
-        is_found = False
-        for idx, link in enumerate(parent.links):
-            if link.href == childLink.href and link.rel == childLink.rel:
-                parent.links[idx] = childLink
-                is_found = True
-        if not is_found:
-            parent.links.append(childLink)
+        parent.links.append(childLink)
 
-    def _update_parent_link(
+    def _create_parent_link(
         self, parent: Union["StacCatalog", "StacCollection"]
     ):
-        """Update parent link
+        """Create parent link
 
         Args:
             parent (Union["StacCatalog", "StacCollection"]): parent
@@ -933,16 +925,63 @@ class StacCatalog(Observer):
 
         self.links.append(parentLink)
 
-    def _update_links(self):
-        """Update links"""
+    def _update_self_link_title(self, title: Union[str, None]):
+        """Update self link
+
+        Args:
+            catalog_name (str): name of this catalog
+            title (Union[str, None]): title to update in self_link
+        """
+        for link in self.links:
+            if link.rel == RelationTypes.SELF:
+                link.title = title
+                break
+
+    def _update_child_link_title(
+        self,
+        parent: Union["StacCatalog", "StacCollection"],
+        title: Union[str, None],
+    ):
+        """Update the child link of the parent
+
+        Args:
+            parent (Union["StacCatalog", "StacCollection"]): parent
+            title (Union[str, None]) : title
+
+        Raises:
+            TypeError: Unexpected type
+        """
+        parent_path: str = parent.path
+        child_path: str = self.path.replace(parent_path, "")
+        href: str = f".{child_path}/{self.id}.json"
+        for link in parent.links:
+            if link.href == href:
+                link.title = title
+                break
+
+    def _create_links(self):
+        """Create the links"""
         if self.parent is None:
-            self._update_root_link()
-            self._update_self_link(f"{self.id}.json")
+            self._create_root_link()
+            self._create_self_link(f"{self.id}.json")
         else:
-            self._update_root_link()
-            self._update_self_link(f"{self.id}.json")
-            self._update_child_link(self.parent)
-            self._update_parent_link(self.parent)
+            self._create_root_link()
+            self._create_self_link(f"{self.id}.json")
+            self._create_child_link(self.parent)
+            self._create_parent_link(self.parent)
+
+    def add_stac_extension(
+        self, extension_name: str, properties: Dict[str, Any]
+    ) -> None:
+        """Additional attributes relating to a Catalog or Collection should be added to the root of the object.
+
+        Args:
+            extension_name (str): Extension name
+            properties (Dict[str, Any]): Dictionary to insert in root object
+        """
+        self.stac_extensions.append(extension_name)
+        self.stac_extensions_properties.update(properties)
+        # TODO : check the extension according JSON schema
 
     @property
     def directory(self):
@@ -981,6 +1020,10 @@ class StacCatalog(Observer):
         return self.__id
 
     @property
+    def stac_extensions_properties(self):
+        return self.__stac_extensions_properties
+
+    @property
     def path(self):
         """Path of the cataloge (as REST style)
 
@@ -1013,6 +1056,8 @@ class StacCatalog(Observer):
     def title(self):
         """A short descriptive one-line title for the Catalog.
 
+        Update the self link and the child link of the parent with the title
+
         :getter: Returns the short descriptive one-line title for the Catalog
         :setter: Set the title
         :type: Union[str, None]
@@ -1027,10 +1072,10 @@ class StacCatalog(Observer):
             )
         self.__title = value
         if self.parent is None:
-            self._update_self_link("catalog.json")
+            self._update_self_link_title(value)
         else:
-            self._update_self_link(f"{self.id}.json")
-            self._update_child_link(self.parent)
+            self._update_self_link_title(value)
+            self._update_child_link_title(self.parent, value)
 
     @property
     def links(self):
@@ -1074,6 +1119,9 @@ class StacCatalog(Observer):
 
         if len(self.stac_extensions) > 0:
             catalog["stac_extensions"] = self.stac_extensions
+
+        if len(self.stac_extensions_properties) > 0:
+            catalog.update(self.stac_extensions_properties)
 
         if self.title is not None:
             catalog["title"] = self.title
@@ -1355,7 +1403,7 @@ class StacItem(Observer):
         self.__parent: Union[
             StacCollection, StacCatalog
         ] = self._validate_parent(kwargs.get("parent", None))
-        self._update_links()
+        self._create_links()
 
     def _validate_parent(
         self, parent: Optional[Union[StacCollection, StacCatalog]]
@@ -1382,8 +1430,8 @@ class StacItem(Observer):
             )
         return parent
 
-    def _update_root_link(self):
-        """Update the root link"""
+    def _create_root_link(self):
+        """Create the root link"""
         root: str = [
             link.href
             for link in self.parent.links
@@ -1397,8 +1445,8 @@ class StacItem(Observer):
         parentLink.type = MediaType.STAC_CATALOG
         self.__links.append(parentLink)
 
-    def _update_self_link(self, catalog_name: str):
-        """Update the self link.
+    def _create_self_link(self, catalog_name: str):
+        """Create the self link.
 
         Args:
             catalog_name (str): name of this catalog or collection name
@@ -1408,8 +1456,8 @@ class StacItem(Observer):
         selfLink.title = str(self.id)
         self.__links.append(selfLink)
 
-    def _update_child_link(self, parent: Union[StacCatalog, StacCollection]):
-        """Update the child links of the parent.
+    def _create_child_link(self, parent: Union[StacCatalog, StacCollection]):
+        """Create the child links in the parent.
 
         Args:
             parent (Union[StacCatalog, StacCollection]): the parent to update
@@ -1423,8 +1471,8 @@ class StacItem(Observer):
         childLink.title = str(self.id)
         parent.links.append(childLink)
 
-    def _update_parent_link(self, parent: Union[StacCatalog, StacCollection]):
-        """Update the parent link.
+    def _create_parent_link(self, parent: Union[StacCatalog, StacCollection]):
+        """Create the parent link.
 
         Args:
             parent (Union[StacCatalog, StacCollection]): update the parent link of the item
@@ -1447,12 +1495,12 @@ class StacItem(Observer):
 
         self.links.append(parentLink)
 
-    def _update_links(self):
+    def _create_links(self):
         """Update the links."""
-        self._update_root_link()
-        self._update_self_link(f"{self.id}.json")
-        self._update_child_link(self.parent)
-        self._update_parent_link(self.parent)
+        self._create_root_link()
+        self._create_self_link(f"{self.id}.json")
+        self._create_child_link(self.parent)
+        self._create_parent_link(self.parent)
 
     def notify(self, observable, *args, **kwargs):
         """Get the notification
