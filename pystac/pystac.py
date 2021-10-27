@@ -1139,7 +1139,7 @@ class StacCatalog(Observer):
             os.makedirs(self.directory + self.path, exist_ok=True)
             logger.debug(f"Saving in {filename}")
             with open(filename, "w") as outfile:
-                json.dump(self.to_json(), outfile)
+                json.dump(self.to_json(), outfile, indent=4)
         elif args[0] == "tree":
             if self.parent is None:
                 print(f"Root directory: {self.directory}")
@@ -1513,7 +1513,7 @@ class StacItem(Observer):
             os.makedirs(self.directory + self.path, exist_ok=True)
             logger.debug(f"Saving in {filename}")
             with open(filename, "w") as outfile:
-                json.dump(self.to_json(), outfile)
+                json.dump(self.to_json(), outfile, indent=4)
         elif args[0] == "tree":
             print(f"\t {self.type} {self.id} : {self.path}/{self.id}.json")
 

@@ -1,4 +1,14 @@
-### Add basic stac extension for catalog and collection Improve tests Add test for testing basic stac extension for catalog and collection (HEAD -> main)
+### Add indent when saving as Json file (HEAD -> main)
+>Wed, 27 Oct 2021 08:10:06 +0200
+
+>Author: Jean-Christophe Malapert (jean-christophe.malapert@cnes.fr)
+
+>Commiter: Jean-Christophe Malapert (jean-christophe.malapert@cnes.fr)
+
+
+
+
+### Add basic stac extension for catalog and collection Improve tests Add test for testing basic stac extension for catalog and collection (origin/main)
 >Tue, 26 Oct 2021 22:02:31 +0200
 
 >Author: Jean-Christophe Malapert (jean-christophe.malapert@cnes.fr)
@@ -8,7 +18,7 @@
 
 
 
-### 1st commit of PySTAC (origin/main)
+### 1st commit of PySTAC
 >Mon, 25 Oct 2021 01:56:37 +0200
 
 >Author: Jean-Christophe Malapert (jean-christophe.malapert@cnes.fr)
