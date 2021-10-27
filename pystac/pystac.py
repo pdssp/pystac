@@ -196,7 +196,7 @@ class Link:
             and not isinstance(value, CommonMediaType)
             and value is not None
         ):
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have MediaType CommonMediaType type or None"
             )
         self.__type = value
@@ -214,7 +214,7 @@ class Link:
     @title.setter
     def title(self, value: Union[str, None]):
         if not isinstance(value, str) and value is not None:
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have str type or None"
             )
         self.__title = value
@@ -263,9 +263,18 @@ class Provider:
         """The name of the organization or the individual.
 
         :getter: Returns the name of the organization or the individual.
+        :setter: Set the name
         :type: str
         """
         return self.__name
+
+    @name.setter
+    def name(self, value: str):
+        if not isinstance(value, str):
+            raise TypeError(
+                f"value has type {type(value)} but must have str type"
+            )
+        self.__name = value
 
     @property
     def description(self):
@@ -283,7 +292,7 @@ class Provider:
     @description.setter
     def description(self, value: Union[str, None]):
         if not isinstance(value, str) and value is not None:
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have str type or None"
             )
         self.__description = value
@@ -310,7 +319,7 @@ class Provider:
     @url.setter
     def url(self, value: Union[str, None]):
         if not isinstance(value, str) and value is not None:
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have str type or None"
             )
         self.__url = value
@@ -376,9 +385,14 @@ class SpatialExtentObject:
         """Potential spatial extents covered by the Collection.
 
         :getter: Returns the spatial extents covered by the Collection.
+        :setter: Sets the bbox
         :type: List[List[float]]
         """
         return self.__bbox
+
+    @bbox.setter
+    def bbox(self, value: List[List[float]]):
+        self.__bbox = value
 
     def to_dict(self):
         """Convert to Dictionary
@@ -436,9 +450,14 @@ class TemporalExtentObject:
         """Potential temporal extents covered by the Collection.
 
         :getter: Returns the temporal extents covered by the Collection.
+        :setter: Sets the interval
         :type: List[List[Union[datetime, None]]]
         """
         return self.__interval
+
+    @interval.setter
+    def interval(self, value: List[List[Union[datetime, None]]]):
+        self.__interval = value
 
     def to_dict(self):
         """Convert to Dictionary
@@ -476,26 +495,44 @@ class ExtentObject:
             spatial (SpatialExtentObject): Potential spatial extents covered by the Collection.
             temporal (TemporalExtentObject): Potential temporal extents covered by the Collection.
         """
-        self.__spatial = spatial
-        self.__temporal = temporal
+        self.__spatial: SpatialExtentObject = spatial
+        self.__temporal: TemporalExtentObject = temporal
 
     @property
     def spatial(self):
         """Potential spatial extents covered by the Collection.
 
         :getter: Returns the spatial extent object
+        :setter: Sets the spatial extent object
         :type: SpatialExtentObject
         """
         return self.__spatial
+
+    @spatial.setter
+    def spatial(self, value: SpatialExtentObject):
+        if not isinstance(value, SpatialExtentObject):
+            raise TypeError(
+                f"value has type {type(value)} but must have SpatialExtentObject type"
+            )
+        self.__spatial = value
 
     @property
     def temporal(self):
         """Potential temporal extents covered by the Collection.
 
         :getter: Returns the temporal extent object
+        :setter: Sets the temporal extent object
         :type: TemporalExtentObject
         """
         return self.__temporal
+
+    @temporal.setter
+    def temporal(self, value: TemporalExtentObject):
+        if not isinstance(value, TemporalExtentObject):
+            raise TypeError(
+                f"value has type {type(value)} but must have TemporalExtentObject type"
+            )
+        self.__temporal = value
 
     def to_dict(self):
         """Convert to Dictionary
@@ -542,9 +579,18 @@ class RangeObject:
         """Minimum value.
 
         :getter: Returns the minimum value
+        :setter: Sets the minimum value
         :type: Union[str, float]
         """
         return self.__minimum
+
+    @minimum.setter
+    def minimum(self, value: Union[str, float]):
+        if not isinstance(value, str) and not isinstance(value, float):
+            raise TypeError(
+                f"value has type {type(value)} but must have str or float type"
+            )
+        self.__minimum = value
 
     @property
     def maximum(self):
@@ -554,6 +600,14 @@ class RangeObject:
         :type: Union[str, float]
         """
         return self.__maximum
+
+    @maximum.setter
+    def maximum(self, value: Union[str, float]):
+        if not isinstance(value, str) and not isinstance(value, float):
+            raise TypeError(
+                f"value has type {type(value)} but must have str or float type"
+            )
+        self.__maximum = value
 
     def to_dict(self):
         """Convert to Dictionary
@@ -596,9 +650,18 @@ class AssetObject:
         """URI to the asset object. Relative and absolute URI are both allowed.
 
         :getter: Returns the URI to the asset
+        :setter: Sets href
         :type: str
         """
         return self.__href
+
+    @href.setter
+    def href(self, value: str):
+        if not isinstance(value, str):
+            raise TypeError(
+                f"value has type {type(value)} but must have str type"
+            )
+        self.__href = value
 
     @property
     def title(self):
@@ -612,8 +675,8 @@ class AssetObject:
 
     @title.setter
     def title(self, value: Union[str, None]):
-        if not isinstance(value, str):
-            raise ValueError(
+        if not isinstance(value, str) and value is not None:
+            raise TypeError(
                 f"value has type {type(value)} but must have str type or None"
             )
         self.__title = value
@@ -633,7 +696,7 @@ class AssetObject:
     @description.setter
     def description(self, value: Union[str, None]):
         if not isinstance(value, str) and value is not None:
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have str type or None"
             )
         self.__description = value
@@ -650,10 +713,12 @@ class AssetObject:
 
     @type.setter
     def type(self, value: Union[MediaTypeAsset, CommonMediaType, None]):
-        if not isinstance(value, MediaTypeAsset) and not isinstance(
-            value, CommonMediaType
+        if (
+            not isinstance(value, MediaTypeAsset)
+            and not isinstance(value, CommonMediaType)
+            and value is not None
         ):
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have MediaTypeAsset type or CommonMediaType type or None"
             )
         self.__type = value
@@ -718,6 +783,14 @@ class Properties:
         """
         return self.__datetime
 
+    @datetime.setter
+    def datetime(self, value: Union[str, None]):
+        if not isinstance(value, str) and value is not None:
+            raise TypeError(
+                f"value has type {type(value)} but must have str type or None"
+            )
+        self.__datetime = value
+
     @property
     def other_properties(self):
         """Add additional properties
@@ -731,7 +804,7 @@ class Properties:
     @other_properties.setter
     def other_properties(self, value: Union[Dict, None]):
         if not isinstance(value, Dict) and value is not None:
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have dict type or None"
             )
         if value is None:
@@ -1039,9 +1112,18 @@ class StacCatalog(Observer):
 
         :getter: Returns the detailed multi-line description to fully explain
         the Catalog
+        :setter: Sets the description
         :type: str
         """
         return self.__description
+
+    @description.setter
+    def description(self, value: str):
+        if not isinstance(value, str):
+            raise TypeError(
+                f"value has type {type(value)} but must have str type"
+            )
+        self.__description = value
 
     @property
     def stac_version(self):
@@ -1067,7 +1149,7 @@ class StacCatalog(Observer):
     @title.setter
     def title(self, value: Union[str, None]):
         if not isinstance(value, str) and value is not None:
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have str type or None"
             )
         self.__title = value
@@ -1233,9 +1315,18 @@ class StacCollection(StacCatalog):
         """Collection's license(s), either a SPDX License identifier.
 
         :getter: Returns the collection license
+        :setter: Sets the license
         :type: LicenseType
         """
         return self.__license
+
+    @license.setter
+    def license(self, value: LicenseType):
+        if not isinstance(value, LicenseType):
+            raise TypeError(
+                f"value has type {type(value)} but must have LicenseType type"
+            )
+        self.__license = value
 
     @property
     def providers(self):
@@ -1258,6 +1349,14 @@ class StacCollection(StacCatalog):
         """
         return self.__extent
 
+    @extent.setter
+    def extent(self, value: ExtentObject):
+        if not isinstance(value, ExtentObject):
+            raise TypeError(
+                f"value has type {type(value)} but must have ExtentObject type"
+            )
+        self.__extent = value
+
     @property
     def summaries(self):
         """A map of property summaries, either a set of values, a range of
@@ -1274,7 +1373,7 @@ class StacCollection(StacCatalog):
         self, value: Union[Dict[str, Union[RangeObject, Any]], None]
     ):
         if not isinstance(value, Dict) and value is not None:
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have dict type or None"
             )
         self.__summaries = value
@@ -1293,7 +1392,7 @@ class StacCollection(StacCatalog):
     @assets.setter
     def assets(self, value: Union[Dict[str, AssetObject], None]):
         if not isinstance(value, Dict) and value is not None:
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have dict type or None"
             )
         self.__assets = value
@@ -1654,7 +1753,7 @@ class StacItem(Observer):
     @collection.setter
     def collection(self, value: Union[str, None]):
         if not isinstance(value, str) and value is not None:
-            raise ValueError(
+            raise TypeError(
                 f"value has type {type(value)} but must have str type or None"
             )
         self.__collection = value

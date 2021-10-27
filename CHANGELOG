@@ -1,4 +1,14 @@
-### Add indent when saving as Json file (HEAD -> main)
+### Add setters (HEAD -> main)
+>Wed, 27 Oct 2021 23:48:07 +0200
+
+>Author: Jean-Christophe Malapert (jean-christophe.malapert@cnes.fr)
+
+>Commiter: Jean-Christophe Malapert (jean-christophe.malapert@cnes.fr)
+
+
+
+
+### Add indent when saving as Json file (origin/main)
 >Wed, 27 Oct 2021 08:10:06 +0200
 
 >Author: Jean-Christophe Malapert (jean-christophe.malapert@cnes.fr)
@@ -8,7 +18,7 @@
 
 
 
-### Add basic stac extension for catalog and collection Improve tests Add test for testing basic stac extension for catalog and collection (origin/main)
+### Add basic stac extension for catalog and collection Improve tests Add test for testing basic stac extension for catalog and collection
 >Tue, 26 Oct 2021 22:02:31 +0200
 
 >Author: Jean-Christophe Malapert (jean-christophe.malapert@cnes.fr)
